@@ -36,6 +36,35 @@
     .login-wrap { max-width: 420px; margin: 12vh auto; text-align: center; }
     .login-wrap input { text-align: center; margin-bottom: 0.85rem; }
     .login-wrap button { width: 100%; }
+
+    /* Tags clicáveis */
+    .saved-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.6rem;
+    }
+    .tag-pill {
+      padding: 0.28rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--muted);
+      font-size: 0.76rem;
+      text-transform: none;
+      letter-spacing: 0;
+      transition: all 0.15s ease;
+    }
+    .tag-pill:hover {
+      border-color: var(--text);
+      color: var(--text);
+    }
+    .tag-pill.active {
+      background: var(--text);
+      color: var(--bg);
+      border-color: var(--text);
+    }
+
     @media (max-width: 780px) { .grid { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -95,8 +124,9 @@
         </div>
         <p id="geo-status" class="hint">Digite a cidade acima e clique em "Buscar coordenadas".</p>
 
-        <label>Tags (separadas por vírgula)</label>
+        <label>Tags (clique nas usadas ou digite novas separadas por vírgula)</label>
         <input type="text" id="tags" placeholder="família, viagem, verão" />
+        <div id="saved-tags" class="saved-tags"></div>
 
         <label>Enviar fotos direto para o GitHub (pasta imagens/)</label>
         <input type="file" id="file-picker" multiple accept="image/*" />
@@ -149,6 +179,8 @@
     const filePicker = document.getElementById("file-picker");
     const imagensField = document.getElementById("imagens");
     const coordsField = document.getElementById("coords");
+    const tagsField = document.getElementById("tags");
+    const savedTagsEl = document.getElementById("saved-tags");
     const geoStatus = document.getElementById("geo-status");
     const uploadStatus = document.getElementById("upload-status");
     const saveBtn = document.getElementById("save-btn");
@@ -195,6 +227,7 @@
       currentSha = data.sha;
       memorias = JSON.parse(base64ToUtf8(data.content));
       renderList();
+      renderSavedTags();
     }
 
     async function salvarNoGitHub(mensagemCommit) {
@@ -210,9 +243,55 @@
         })
       });
       currentSha = res.content.sha;
-      mostrarStatus("Salvo com sucesso! O site público atualizará em cerca de 1 minuto.", "ok");
+      mostrarStatus("Salvo com sucesso! O site público atualizará em cerca de 1 a 3 minutos.", "ok");
     }
 
+    // --- TAGS SALVAS / CLICÁVEIS ---
+    function getTagsAtuais() {
+      return tagsField.value
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
+    }
+
+    function renderSavedTags() {
+      const todas = new Set();
+      memorias.forEach((m) => {
+        (m.tags || []).forEach((t) => {
+          const limpa = t.trim();
+          if (limpa) todas.add(limpa);
+        });
+      });
+
+      const ordenadas = Array.from(todas).sort((a, b) => a.localeCompare(b, "pt-BR"));
+      const selecionadas = new Set(getTagsAtuais().map((t) => t.toLowerCase()));
+
+      savedTagsEl.innerHTML = "";
+      ordenadas.forEach((tag) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `tag-pill ${selecionadas.has(tag.toLowerCase()) ? "active" : ""}`;
+        btn.textContent = `#${tag}`;
+        btn.addEventListener("click", () => toggleTag(tag));
+        savedTagsEl.appendChild(btn);
+      });
+    }
+
+    function toggleTag(tag) {
+      const atuais = getTagsAtuais();
+      const idx = atuais.findIndex((t) => t.toLowerCase() === tag.toLowerCase());
+      if (idx >= 0) {
+        atuais.splice(idx, 1);
+      } else {
+        atuais.push(tag);
+      }
+      tagsField.value = atuais.join(", ");
+      renderSavedTags();
+    }
+
+    tagsField.addEventListener("input", renderSavedTags);
+
+    // --- LOGIN ---
     async function tentarEntrar(novoToken) {
       token = novoToken.trim();
       try {
@@ -239,6 +318,7 @@
       location.reload();
     });
 
+    // --- UPLOAD DE IMAGENS ---
     filePicker.addEventListener("change", async () => {
       const files = Array.from(filePicker.files);
       if (!files.length) return;
@@ -278,6 +358,7 @@
       filePicker.value = "";
     });
 
+    // --- BUSCA DE COORDENADAS ---
     document.getElementById("geo-btn").addEventListener("click", async () => {
       const cidade = document.getElementById("lugar").value.trim();
       if (!cidade) { geoStatus.textContent = "Digite o lugar primeiro."; return; }
@@ -296,17 +377,26 @@
       }
     });
 
+    // --- SALVAR MEMÓRIA ---
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       saveBtn.disabled = true;
 
       const coordsRaw = coordsField.value.split(",").map((n) => parseFloat(n.trim())).filter((n) => !isNaN(n));
+      // Remove duplicatas de tags na mesma memória
+      const tagsUnicas = [];
+      getTagsAtuais().forEach((t) => {
+        if (!tagsUnicas.some((u) => u.toLowerCase() === t.toLowerCase())) {
+          tagsUnicas.push(t);
+        }
+      });
+
       const item = {
         titulo: document.getElementById("titulo").value.trim(),
         ano: Number(document.getElementById("ano").value),
         lugar: document.getElementById("lugar").value.trim(),
         coords: coordsRaw.length === 2 ? coordsRaw : undefined,
-        tags: document.getElementById("tags").value.split(",").map((t) => t.trim()).filter(Boolean),
+        tags: tagsUnicas,
         imagens: imagensField.value.split("\n").map((l) => l.trim()).filter(Boolean),
         texto: document.getElementById("texto").value.trim()
       };
@@ -320,6 +410,7 @@
         await salvarNoGitHub(acao);
         limparFormulario();
         renderList();
+        renderSavedTags();
       } catch (err) {
         mostrarStatus(`Erro ao salvar: ${err.message}`, "err");
       } finally {
@@ -333,6 +424,7 @@
       form.reset();
       document.getElementById("edit-index").value = "-1";
       saveBtn.textContent = "Salvar memória no GitHub";
+      renderSavedTags();
     }
 
     function renderList() {
@@ -362,10 +454,11 @@
       document.getElementById("ano").value = m.ano;
       document.getElementById("lugar").value = m.lugar;
       coordsField.value = m.coords ? m.coords.join(", ") : "";
-      document.getElementById("tags").value = (m.tags || []).join(", ");
+      tagsField.value = (m.tags || []).join(", ");
       imagensField.value = (m.imagens || []).join("\n");
       document.getElementById("texto").value = m.texto;
       saveBtn.textContent = "Atualizar memória no GitHub";
+      renderSavedTags();
       window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
@@ -376,6 +469,7 @@
       try {
         await salvarNoGitHub(`Remove memória: ${titulo}`);
         renderList();
+        renderSavedTags();
       } catch (err) {
         mostrarStatus(`Erro ao excluir: ${err.message}`, "err");
       }
