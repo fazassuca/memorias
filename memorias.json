@@ -1,5 +1,27 @@
 [
   {
+    "titulo": "Primeira morada no Canadá",
+    "ano": 2006,
+    "lugar": "Charlottetown",
+    "coords": [
+      46.2354,
+      -63.1265
+    ],
+    "tags": [
+      "canadá",
+      "20 e pouco"
+    ],
+    "imagens": [
+      "imagens/1795611359539-293946005_0ef71c34ef_c.jpg",
+      "imagens/1795611361487-293946016_61afa1577f_c.jpg",
+      "imagens/1795611363291-293946022_3846fb5aa6_c.jpg",
+      "imagens/1795611365328-293946028_2738f1510c_c.jpg",
+      "imagens/1795611367121-293946040_b971226267_c.jpg",
+      "imagens/1795611369056-293946054_4e23d27349_c.jpg"
+    ],
+    "texto": "Ver essas imagens me remete à várias memórias. Quando parti para o Canadá com 22 anos, não imaginava o que iria viver e como isso iria me transformar. Quem me recebeu no aeroporto foi Alex Feldman, na época responsável pelos alunos internacionais da Holland College, onde eu estava indo para fazer meu curso de Design. Eu tinha saído de 1 mês de vida livre no Rio de Janeiro, tinha enfrentado 12 horas de vôo de São Paulo até Toronto (na última poltrona, pois deu overbooking), tinha passado 3 dias curiosos em Toronto e chegado finalmente no meu destino final. Depois de tanta despedida, chegar era ter concluído uma missão. Em 15 minutos de carro, Alex me mostrou a cidade quase toda, me deixou na frente da casa que eu iria morar (que ele tinha arranjado) e ali começava minha aventura. Essas fotos revelam muito dos meus seis primeiros meses. Eu já morava sozinho em João Pessoa, mas não tinha ainda amadurecido o suficiente pra me virar em outro país. E foi assim que me virei sozinho. Eu escrevi nas legendas dessas fotos no flickr e copio aqui:\n\nFoto da mesa: Meu cantinho. Persiana, mesinha pra noites de pinturas e desenhos, dois abajus para me dar um pouco de luz com ajuda do rebatedor.\n\nFoto da porta: Meu cantinho. Bandeira do Brasil, trabalho de reprodução da História do Design Gráfico, meu guarda-pratos, um pacote de Oreos.\n\nFoto da cozinha: Meu cantinho. Microondas, nissin miojo, arroz temperado Uncle Beans, tostadeira, cafeteira, frigobar, sopas chunky campbells, meu fogãozinho 2 bocas, garrafas vazias de pepsi e todas as coisas boas da boa cozinha: azeite, manjericão, manjoram e sal. No topo tá mais um trabalho de Structural.\n\nFoto do armário: Meu cantinho. Malona, armário dos casacos, cadeira dos casacos, tvzinha, todas as câmeras diante do espelho, minhas gavetas e o carpete chato.\n\nFoto da cama: Meu cantinho. Luminária, cama boa, 2 edredons, um lençol, uma colcha, duas toalhas, minha estante de livros, despertador com textura de tigre (!), quadros da dona do quarto.\n\nA foto externa é a vista da frente da casa."
+  },
+  {
     "titulo": "Casa de Dalí",
     "ano": 2009,
     "lugar": "Port Lligat",
