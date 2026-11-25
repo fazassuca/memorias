@@ -25,3 +25,4 @@ Site estático pessoal hospedado no GitHub Pages (`fazassuca/memorias`), constru
 - Responder sempre em português (pt-BR).
 - Manter o projeto 100% estático (HTML/CSS/JS puro), sem exigir Node/npm para rodar.
 - Nunca quebrar a compatibilidade com a estrutura atual do `memorias.json`.
+- Manter localmente na pasta `_versoes/` (ignorada no `.gitignore`) as 2 versões anteriores mais recentes de `index.html`, `style.css`, `script.js` e `editor.html` antes de cada nova implementação.

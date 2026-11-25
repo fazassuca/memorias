@@ -149,7 +149,7 @@
 
         <label>Enviar fotos direto para o GitHub (pasta imagens/)</label>
         <input type="file" id="file-picker" multiple accept="image/*" />
-        <p id="upload-status" class="hint">As fotos selecionadas serão enviadas automaticamente para a pasta <code>imagens/</code> ao selecionar.</p>
+        <p id="upload-status" class="hint">As fotos selecionadas serão otimizadas (máx. 1600px, JPEG) e enviadas automaticamente para a pasta <code>imagens/</code>.</p>
 
         <label>Caminhos ou links das imagens (um por linha)</label>
         <textarea id="imagens" style="min-height: 85px;" placeholder="imagens/foto-01.jpg&#10;https://..."></textarea>
@@ -231,6 +231,7 @@
     async function ghFetch(path, options = {}) {
       const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}`;
       const res = await fetch(url, {
+        cache: "no-store",
         ...options,
         headers: {
           Authorization: `Bearer ${token}`,
@@ -240,16 +241,26 @@
         }
       });
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || `Erro HTTP ${res.status}`);
+        const errData = await res.json().catch(() => ({}));
+        const err = new Error(errData.message || `Erro HTTP ${res.status}`);
+        err.status = res.status;
+        throw err;
       }
       return res.json();
     }
 
+    async function buscarMemoriasRemotas() {
+      const data = await ghFetch(`${CONFIG.filePath}?ref=${CONFIG.branch}&t=${Date.now()}`);
+      return {
+        sha: data.sha,
+        lista: JSON.parse(base64ToUtf8(data.content))
+      };
+    }
+
     async function carregarDoGitHub() {
-      const data = await ghFetch(`${CONFIG.filePath}?ref=${CONFIG.branch}`);
-      currentSha = data.sha;
-      memorias = JSON.parse(base64ToUtf8(data.content));
+      const { sha, lista } = await buscarMemoriasRemotas();
+      currentSha = sha;
+      memorias = lista;
       renderList();
       renderSavedTags();
     }
@@ -342,44 +353,138 @@
       location.reload();
     });
 
-    // --- UPLOAD DE IMAGENS ---
+    // --- UPLOAD E COMPRESSÃO DE IMAGENS ---
+    const MAX_IMG_DIM = 1600;
+    const JPEG_QUALITY = 0.82;
+
+    function formatarBytes(bytes) {
+      if (bytes < 1024) return `${bytes} B`;
+      if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+      return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    }
+
+    function blobParaBase64(blob) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(",")[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    function extrairExtensao(nome, fallback = "jpg") {
+      const m = nome.match(/\.([a-zA-Z0-9]+)$/);
+      return m ? m[1].toLowerCase() : fallback;
+    }
+
+    async function prepararImagemUpload(file) {
+      const extOriginal = extrairExtensao(file.name);
+      if (file.type === "image/gif" || file.type === "image/svg+xml") {
+        return { blob: file, ext: extOriginal, tamanhoOriginal: file.size, tamanhoFinal: file.size };
+      }
+
+      const objectUrl = URL.createObjectURL(file);
+      try {
+        const img = await new Promise((resolve, reject) => {
+          const el = new Image();
+          el.onload = () => resolve(el);
+          el.onerror = reject;
+          el.src = objectUrl;
+        });
+
+        const w = img.naturalWidth;
+        const h = img.naturalHeight;
+        if (!w || !h) {
+          return { blob: file, ext: extOriginal, tamanhoOriginal: file.size, tamanhoFinal: file.size };
+        }
+
+        const maiorLado = Math.max(w, h);
+        const escala = maiorLado > MAX_IMG_DIM ? MAX_IMG_DIM / maiorLado : 1;
+        const novoW = Math.round(w * escala);
+        const novoH = Math.round(h * escala);
+
+        const canvas = document.createElement("canvas");
+        canvas.width = novoW;
+        canvas.height = novoH;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0, 0, novoW, novoH);
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(img, 0, 0, novoW, novoH);
+
+        const comprimido = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", JPEG_QUALITY));
+        if (comprimido && comprimido.size < file.size) {
+          return { blob: comprimido, ext: "jpg", tamanhoOriginal: file.size, tamanhoFinal: comprimido.size };
+        }
+      } catch {
+        // Fallback para formatos não decodificados pelo navegador (ex.: HEIC)
+      } finally {
+        URL.revokeObjectURL(objectUrl);
+      }
+
+      return { blob: file, ext: extOriginal, tamanhoOriginal: file.size, tamanhoFinal: file.size };
+    }
+
     filePicker.addEventListener("change", async () => {
       const files = Array.from(filePicker.files);
       if (!files.length) return;
-      uploadStatus.textContent = "Enviando foto(s) para o GitHub...";
+
+      filePicker.disabled = true;
+      saveBtn.disabled = true;
       const enviados = [];
+      let totalOriginal = 0;
+      let totalFinal = 0;
 
-      for (const file of files) {
-        try {
-          const safeName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-          const caminho = `imagens/${safeName}`;
-          const b64 = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result.split(",")[1]);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-          });
+      try {
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          uploadStatus.textContent = `Otimizando e enviando foto ${i + 1} de ${files.length}...`;
+          try {
+            const prep = await prepararImagemUpload(file);
+            const baseLimpo = file.name.replace(/\.[^.]+$/, "").replace(/[^a-zA-Z0-9._-]/g, "_") || "foto";
+            const safeName = `${Date.now()}-${i}-${baseLimpo}.${prep.ext}`;
+            const caminho = `imagens/${safeName}`;
+            const b64 = await blobParaBase64(prep.blob);
 
-          await ghFetch(caminho, {
-            method: "PUT",
-            body: JSON.stringify({
+            const payload = JSON.stringify({
               message: `Upload imagem ${safeName}`,
               content: b64,
               branch: CONFIG.branch
-            })
-          });
-          enviados.push(caminho);
-        } catch (err) {
-          mostrarStatus(`Erro ao enviar ${file.name}: ${err.message}`, "err");
-        }
-      }
+            });
 
-      if (enviados.length) {
-        const atual = imagensField.value.trim();
-        imagensField.value = atual ? atual + "\n" + enviados.join("\n") : enviados.join("\n");
-        uploadStatus.textContent = `${enviados.length} foto(s) enviada(s) para imagens/ com sucesso.`;
+            try {
+              await ghFetch(caminho, { method: "PUT", body: payload });
+            } catch (err) {
+              if (err.status === 409) {
+                await new Promise((r) => setTimeout(r, 600));
+                await ghFetch(caminho, { method: "PUT", body: payload });
+              } else {
+                throw err;
+              }
+            }
+            enviados.push(caminho);
+            totalOriginal += prep.tamanhoOriginal;
+            totalFinal += prep.tamanhoFinal;
+          } catch (err) {
+            mostrarStatus(`Erro ao enviar ${file.name}: ${err.message}`, "err");
+          }
+        }
+
+        if (enviados.length) {
+          const atual = imagensField.value.trim();
+          imagensField.value = atual ? atual + "\n" + enviados.join("\n") : enviados.join("\n");
+          const resumoTamanho =
+            totalFinal < totalOriginal
+              ? `${formatarBytes(totalOriginal)} → ${formatarBytes(totalFinal)}`
+              : formatarBytes(totalFinal);
+          uploadStatus.textContent = `${enviados.length} foto(s) enviada(s) para imagens/ (${resumoTamanho}).`;
+        }
+      } finally {
+        filePicker.value = "";
+        filePicker.disabled = false;
+        saveBtn.disabled = false;
       }
-      filePicker.value = "";
     });
 
     // --- BUSCA DE COORDENADAS ---
@@ -427,15 +532,30 @@
 
       const idx = Number(document.getElementById("edit-index").value);
       const acao = idx >= 0 ? `Atualiza memória: ${item.titulo}` : `Nova memória: ${item.titulo}`;
-      if (idx >= 0) memorias[idx] = item;
-      else memorias.unshift(item);
 
       try {
+        const remoto = await buscarMemoriasRemotas();
+        if (remoto.sha !== currentSha && idx >= 0) {
+          currentSha = remoto.sha;
+          memorias = remoto.lista;
+          renderList();
+          renderSavedTags();
+          mostrarStatus("O memorias.json foi alterado no GitHub enquanto você editava. A lista foi atualizada; abra a memória novamente para evitar sobrescrever dados.", "err");
+          return;
+        }
+
+        const listaAtualizada = [...remoto.lista];
+        currentSha = remoto.sha;
+        if (idx >= 0) listaAtualizada[idx] = item;
+        else listaAtualizada.unshift(item);
+
+        memorias = listaAtualizada;
         await salvarNoGitHub(acao);
         limparFormulario();
         renderList();
         renderSavedTags();
       } catch (err) {
+        await carregarDoGitHub().catch(() => {});
         mostrarStatus(`Erro ao salvar: ${err.message}`, "err");
       } finally {
         saveBtn.disabled = false;
@@ -489,12 +609,22 @@
     window.remover = async (i) => {
       const titulo = memorias[i].titulo;
       if (!confirm(`Excluir "${titulo}" definitivamente?`)) return;
-      memorias.splice(i, 1);
       try {
+        const remoto = await buscarMemoriasRemotas();
+        if (remoto.sha !== currentSha) {
+          currentSha = remoto.sha;
+          memorias = remoto.lista;
+          renderList();
+          renderSavedTags();
+          mostrarStatus("O memorias.json mudou no GitHub. A lista foi atualizada; confirme a exclusão novamente.", "err");
+          return;
+        }
+        memorias.splice(i, 1);
         await salvarNoGitHub(`Remove memória: ${titulo}`);
         renderList();
         renderSavedTags();
       } catch (err) {
+        await carregarDoGitHub().catch(() => {});
         mostrarStatus(`Erro ao excluir: ${err.message}`, "err");
       }
     };
