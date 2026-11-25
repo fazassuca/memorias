@@ -36,6 +36,7 @@
     .login-wrap { max-width: 420px; margin: 12vh auto; text-align: center; }
     .login-wrap input { text-align: center; margin-bottom: 0.85rem; }
     .login-wrap button { width: 100%; }
+    
 
     /* Tags clicáveis */
     .saved-tags {
@@ -62,6 +63,24 @@
     .tag-pill.active {
       background: var(--text);
       color: var(--bg);
+      border-color: var(--text);
+    }
+
+    .editor-toolbar {
+      display: flex;
+      gap: 0.4rem;
+      margin-bottom: 0.4rem;
+    }
+    .tool-btn {
+      padding: 0.35rem 0.7rem;
+      font-size: 0.78rem;
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border);
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .tool-btn:hover {
       border-color: var(--text);
     }
 
@@ -135,9 +154,14 @@
         <label>Caminhos ou links das imagens (um por linha)</label>
         <textarea id="imagens" style="min-height: 85px;" placeholder="imagens/foto-01.jpg&#10;https://..."></textarea>
 
-        <label>Texto da história</label>
+       <label>Texto da história</label>
+        <div class="editor-toolbar">
+          <button type="button" class="tool-btn" data-format="bold" title="Negrito"><strong>B</strong></button>
+          <button type="button" class="tool-btn" data-format="italic" title="Itálico"><em>I</em></button>
+          <button type="button" class="tool-btn" data-format="quote" title="Citação em destaque">“ Citação ”</button>
+        </div>
         <textarea id="texto" required placeholder="Escreva sua memória aqui... Use Enter para separar parágrafos."></textarea>
-
+        
         <div class="actions">
           <button type="submit" id="save-btn">Salvar memória no GitHub</button>
           <button type="button" class="secondary" id="clear-btn">Limpar</button>
