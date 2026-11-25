@@ -6,87 +6,143 @@
   <title>Gerenciador do Diário</title>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
-    body { font-family: 'Manrope', sans-serif; background: #FAF9F6; color: #1A1A1A; max-width: 960px; margin: 0 auto; padding: 3rem 1.5rem; }
-    h1 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 3rem; margin-bottom: 0.5rem; }
-    .subtitle { color: #6E6A63; margin-bottom: 2.5rem; font-size: 0.9rem; }
-    .grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 3rem; }
-    label { display: block; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: #6E6A63; margin: 1rem 0 0.35rem; }
-    input, textarea { width: 100%; padding: 0.75rem; border: 1px solid #E2DED5; background: #fff; font-family: inherit; font-size: 0.95rem; }
+    :root {
+      --bg: #FAF9F6; --card: #FFFFFF; --text: #1A1A1A;
+      --muted: #6E6A63; --border: #E2DED5;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Manrope', sans-serif; background: var(--bg); color: var(--text); max-width: 980px; margin: 0 auto; padding: 3rem 1.5rem; }
+    .hidden { display: none !important; }
+    h1 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 3rem; margin-bottom: 0.4rem; }
+    .subtitle { color: var(--muted); margin-bottom: 2rem; font-size: 0.9rem; }
+    .topbar { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 2rem; }
+    .grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 3rem; }
+    label { display: block; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 1rem 0 0.35rem; }
+    input, textarea { width: 100%; padding: 0.75rem; border: 1px solid var(--border); background: var(--card); font-family: inherit; font-size: 0.95rem; color: var(--text); }
     textarea { min-height: 150px; resize: vertical; line-height: 1.6; }
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; flex-wrap: wrap; }
-    button { padding: 0.75rem 1.25rem; border: 1px solid #1A1A1A; background: #1A1A1A; color: #FAF9F6; font-family: inherit; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.06em; cursor: pointer; }
-    button.secondary { background: transparent; color: #1A1A1A; }
-    .list-item { border-bottom: 1px solid #E2DED5; padding: 0.9rem 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+    button { padding: 0.75rem 1.25rem; border: 1px solid var(--text); background: var(--text); color: var(--bg); font-family: inherit; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; cursor: pointer; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    button.secondary { background: transparent; color: var(--text); }
+    .list-item { border-bottom: 1px solid var(--border); padding: 0.9rem 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
     .list-item strong { font-family: 'Instrument Serif', serif; font-size: 1.35rem; font-weight: 400; display: block; }
-    .list-item span { font-size: 0.78rem; color: #6E6A63; }
+    .list-item span { font-size: 0.78rem; color: var(--muted); }
     .small-btn { padding: 0.35rem 0.65rem; font-size: 0.72rem; }
-    .hint { font-size: 0.78rem; color: #6E6A63; margin-top: 0.35rem; }
+    .hint { font-size: 0.78rem; color: var(--muted); margin-top: 0.35rem; }
+    .status-bar { padding: 0.75rem 1rem; border: 1px solid var(--border); background: var(--card); font-size: 0.85rem; margin-bottom: 1.5rem; }
+    .status-bar.ok { border-color: #2f6f4e; color: #2f6f4e; }
+    .status-bar.err { border-color: #a33b3b; color: #a33b3b; }
+    .login-wrap { max-width: 420px; margin: 12vh auto; text-align: center; }
+    .login-wrap input { text-align: center; margin-bottom: 0.85rem; }
+    .login-wrap button { width: 100%; }
     @media (max-width: 780px) { .grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
-  <h1>Gerenciador de Memórias</h1>
-  <p class="subtitle">Adicione ou edite suas histórias e clique em "Baixar memorias.json" para substituir o arquivo na pasta do projeto.</p>
 
-  <div class="grid">
-    <form id="editor-form">
-      <input type="hidden" id="edit-index" value="-1" />
-
-      <label>Título</label>
-      <input type="text" id="titulo" required placeholder="Ex: Verão na casa de praia" />
-
-      <div class="row">
-        <div>
-          <label>Ano</label>
-          <input type="number" id="ano" required placeholder="2024" />
-        </div>
-        <div>
-          <label>Lugar / Cidade</label>
-          <input type="text" id="lugar" required placeholder="João Pessoa" />
-        </div>
-      </div>
-
-      <div class="row" style="align-items: end;">
-        <div>
-          <label>Latitude / Longitude (Mapa)</label>
-          <input type="text" id="coords" placeholder="-7.1195, -34.8450" />
-        </div>
-        <div>
-          <button type="button" class="secondary" id="geo-btn" style="width:100%;">Buscar coordenadas</button>
-        </div>
-      </div>
-      <p id="geo-status" class="hint">Digite a cidade acima e clique em "Buscar coordenadas" para marcar no mapa automaticamente.</p>
-
-      <label>Tags (separadas por vírgula)</label>
-      <input type="text" id="tags" placeholder="família, viagem, verão" />
-
-      <label>Selecionar fotos da pasta imagens/ (opcional)</label>
-      <input type="file" id="file-picker" multiple accept="image/*" />
-
-      <label>Caminhos ou links das imagens (um por linha)</label>
-      <textarea id="imagens" style="min-height: 85px;" placeholder="imagens/foto-01.jpg&#10;https://..."></textarea>
-
-      <label>Texto da história</label>
-      <textarea id="texto" required placeholder="Escreva sua memória aqui... Use Enter para separar parágrafos."></textarea>
-
-      <div class="actions">
-        <button type="submit" id="save-btn">Adicionar memória</button>
-        <button type="button" class="secondary" id="clear-btn">Limpar</button>
-      </div>
+  <section id="login-screen" class="login-wrap">
+    <p class="hint" style="text-transform:uppercase; letter-spacing:0.12em;">Acesso Restrito</p>
+    <h1>Gerenciador</h1>
+    <p class="subtitle">Insira seu Token de Acesso do GitHub para editar o diário diretamente online.</p>
+    <form id="login-form">
+      <input type="password" id="token-input" placeholder="github_pat_..." required autocomplete="off" />
+      <button type="submit" id="login-btn">Entrar</button>
     </form>
+    <p id="login-error" class="hint" style="color:#a33b3b; margin-top:0.75rem;"></p>
+  </section>
 
-    <div>
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-        <strong id="count-label">0 memórias</strong>
-        <button type="button" id="download-btn">Baixar memorias.json</button>
+  <main id="editor-app" class="hidden">
+    <div class="topbar">
+      <div>
+        <h1>Gerenciador de Memórias</h1>
+        <p class="subtitle">As alterações são salvas automaticamente no <code>memorias.json</code> do GitHub.</p>
       </div>
-      <div id="memory-list"></div>
+      <div style="display:flex; gap:0.5rem;">
+        <a href="index.html" style="text-decoration:none;"><button type="button" class="secondary">Ver site</button></a>
+        <button type="button" class="secondary" id="logout-btn">Sair</button>
+      </div>
     </div>
-  </div>
+
+    <div id="status-bar" class="status-bar hidden"></div>
+
+    <div class="grid">
+      <form id="editor-form">
+        <input type="hidden" id="edit-index" value="-1" />
+
+        <label>Título</label>
+        <input type="text" id="titulo" required placeholder="Ex: Verão na casa de praia" />
+
+        <div class="row">
+          <div>
+            <label>Ano</label>
+            <input type="number" id="ano" required placeholder="2024" />
+          </div>
+          <div>
+            <label>Lugar / Cidade</label>
+            <input type="text" id="lugar" required placeholder="João Pessoa" />
+          </div>
+        </div>
+
+        <div class="row" style="align-items: end;">
+          <div>
+            <label>Latitude / Longitude (Mapa)</label>
+            <input type="text" id="coords" placeholder="-7.1195, -34.8450" />
+          </div>
+          <div>
+            <button type="button" class="secondary" id="geo-btn" style="width:100%;">Buscar coordenadas</button>
+          </div>
+        </div>
+        <p id="geo-status" class="hint">Digite a cidade acima e clique em "Buscar coordenadas".</p>
+
+        <label>Tags (separadas por vírgula)</label>
+        <input type="text" id="tags" placeholder="família, viagem, verão" />
+
+        <label>Enviar fotos direto para o GitHub (pasta imagens/)</label>
+        <input type="file" id="file-picker" multiple accept="image/*" />
+        <p id="upload-status" class="hint">As fotos selecionadas serão enviadas automaticamente para a pasta <code>imagens/</code> ao selecionar.</p>
+
+        <label>Caminhos ou links das imagens (um por linha)</label>
+        <textarea id="imagens" style="min-height: 85px;" placeholder="imagens/foto-01.jpg&#10;https://..."></textarea>
+
+        <label>Texto da história</label>
+        <textarea id="texto" required placeholder="Escreva sua memória aqui... Use Enter para separar parágrafos."></textarea>
+
+        <div class="actions">
+          <button type="submit" id="save-btn">Salvar memória no GitHub</button>
+          <button type="button" class="secondary" id="clear-btn">Limpar</button>
+        </div>
+      </form>
+
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+          <strong id="count-label">Carregando...</strong>
+        </div>
+        <div id="memory-list"></div>
+      </div>
+    </div>
+  </main>
 
   <script>
+    // === PREENCHA COM OS DADOS DO SEU REPOSITÓRIO ===
+    const CONFIG = {
+      owner: "fazassuca",   // Ex: "joaosilva"
+      repo: "memorias",   // Ex: "meu-diario"
+      branch: "main",                // "main" ou "master"
+      filePath: "memorias.json"
+    };
+
+    let token = localStorage.getItem("diario_gh_token") || "";
     let memorias = [];
+    let currentSha = null;
+
+    const elLoginScreen = document.getElementById("login-screen");
+    const elEditorApp = document.getElementById("editor-app");
+    const elLoginForm = document.getElementById("login-form");
+    const elTokenInput = document.getElementById("token-input");
+    const elLoginError = document.getElementById("login-error");
+    const elStatusBar = document.getElementById("status-bar");
+
     const form = document.getElementById("editor-form");
     const listEl = document.getElementById("memory-list");
     const countEl = document.getElementById("count-label");
@@ -94,19 +150,137 @@
     const imagensField = document.getElementById("imagens");
     const coordsField = document.getElementById("coords");
     const geoStatus = document.getElementById("geo-status");
+    const uploadStatus = document.getElementById("upload-status");
+    const saveBtn = document.getElementById("save-btn");
 
-    fetch("memorias.json")
-      .then((r) => r.json())
-      .then((data) => { memorias = data; renderList(); })
-      .catch(() => renderList());
+    function utf8ToBase64(str) {
+      const bytes = new TextEncoder().encode(str);
+      let binary = "";
+      bytes.forEach((b) => (binary += String.fromCharCode(b)));
+      return btoa(binary);
+    }
 
-    // Busca automática de coordenadas via OpenStreetMap
+    function base64ToUtf8(b64) {
+      const binary = atob(b64.replace(/\n/g, ""));
+      const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+      return new TextDecoder().decode(bytes);
+    }
+
+    function mostrarStatus(msg, tipo = "") {
+      elStatusBar.textContent = msg;
+      elStatusBar.className = `status-bar ${tipo}`;
+      elStatusBar.classList.remove("hidden");
+    }
+
+    async function ghFetch(path, options = {}) {
+      const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}`;
+      const res = await fetch(url, {
+        ...options,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/vnd.github+json",
+          "Content-Type": "application/json",
+          ...(options.headers || {})
+        }
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `Erro HTTP ${res.status}`);
+      }
+      return res.json();
+    }
+
+    async function carregarDoGitHub() {
+      const data = await ghFetch(`${CONFIG.filePath}?ref=${CONFIG.branch}`);
+      currentSha = data.sha;
+      memorias = JSON.parse(base64ToUtf8(data.content));
+      renderList();
+    }
+
+    async function salvarNoGitHub(mensagemCommit) {
+      mostrarStatus("Salvando no GitHub...");
+      const content = utf8ToBase64(JSON.stringify(memorias, null, 2));
+      const res = await ghFetch(CONFIG.filePath, {
+        method: "PUT",
+        body: JSON.stringify({
+          message: mensagemCommit,
+          content,
+          sha: currentSha,
+          branch: CONFIG.branch
+        })
+      });
+      currentSha = res.content.sha;
+      mostrarStatus("Salvo com sucesso! O site público atualizará em cerca de 1 minuto.", "ok");
+    }
+
+    async function tentarEntrar(novoToken) {
+      token = novoToken.trim();
+      try {
+        await carregarDoGitHub();
+        localStorage.setItem("diario_gh_token", token);
+        elLoginScreen.classList.add("hidden");
+        elEditorApp.classList.remove("hidden");
+        elLoginError.textContent = "";
+      } catch (err) {
+        localStorage.removeItem("diario_gh_token");
+        elLoginScreen.classList.remove("hidden");
+        elEditorApp.classList.add("hidden");
+        elLoginError.textContent = `Não foi possível autenticar: ${err.message}`;
+      }
+    }
+
+    elLoginForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      tentarEntrar(elTokenInput.value);
+    });
+
+    document.getElementById("logout-btn").addEventListener("click", () => {
+      localStorage.removeItem("diario_gh_token");
+      location.reload();
+    });
+
+    filePicker.addEventListener("change", async () => {
+      const files = Array.from(filePicker.files);
+      if (!files.length) return;
+      uploadStatus.textContent = "Enviando foto(s) para o GitHub...";
+      const enviados = [];
+
+      for (const file of files) {
+        try {
+          const safeName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+          const caminho = `imagens/${safeName}`;
+          const b64 = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result.split(",")[1]);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+
+          await ghFetch(caminho, {
+            method: "PUT",
+            body: JSON.stringify({
+              message: `Upload imagem ${safeName}`,
+              content: b64,
+              branch: CONFIG.branch
+            })
+          });
+          enviados.push(caminho);
+        } catch (err) {
+          mostrarStatus(`Erro ao enviar ${file.name}: ${err.message}`, "err");
+        }
+      }
+
+      if (enviados.length) {
+        const atual = imagensField.value.trim();
+        imagensField.value = atual ? atual + "\n" + enviados.join("\n") : enviados.join("\n");
+        uploadStatus.textContent = `${enviados.length} foto(s) enviada(s) para imagens/ com sucesso.`;
+      }
+      filePicker.value = "";
+    });
+
     document.getElementById("geo-btn").addEventListener("click", async () => {
       const cidade = document.getElementById("lugar").value.trim();
-      if (!cidade) {
-        geoStatus.textContent = "Digite o nome do lugar/cidade primeiro.";
-        return;
-      }
+      if (!cidade) { geoStatus.textContent = "Digite o lugar primeiro."; return; }
       geoStatus.textContent = "Buscando...";
       try {
         const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(cidade)}`);
@@ -115,21 +289,17 @@
           coordsField.value = `${Number(data[0].lat).toFixed(4)}, ${Number(data[0].lon).toFixed(4)}`;
           geoStatus.textContent = `Encontrado: ${data[0].display_name}`;
         } else {
-          geoStatus.textContent = "Cidade não encontrada. Tente adicionar o estado ou país (ex: João Pessoa, Brasil).";
+          geoStatus.textContent = "Cidade não encontrada. Tente incluir o estado ou país.";
         }
       } catch {
-        geoStatus.textContent = "Erro ao buscar coordenadas. Verifique sua conexão.";
+        geoStatus.textContent = "Erro ao buscar coordenadas.";
       }
     });
 
-    filePicker.addEventListener("change", () => {
-      const nomes = Array.from(filePicker.files).map((f) => `imagens/${f.name}`);
-      const atual = imagensField.value.trim();
-      imagensField.value = atual ? atual + "\n" + nomes.join("\n") : nomes.join("\n");
-    });
-
-    form.addEventListener("submit", (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
+      saveBtn.disabled = true;
+
       const coordsRaw = coordsField.value.split(",").map((n) => parseFloat(n.trim())).filter((n) => !isNaN(n));
       const item = {
         titulo: document.getElementById("titulo").value.trim(),
@@ -142,11 +312,19 @@
       };
 
       const idx = Number(document.getElementById("edit-index").value);
+      const acao = idx >= 0 ? `Atualiza memória: ${item.titulo}` : `Nova memória: ${item.titulo}`;
       if (idx >= 0) memorias[idx] = item;
       else memorias.unshift(item);
 
-      limparFormulario();
-      renderList();
+      try {
+        await salvarNoGitHub(acao);
+        limparFormulario();
+        renderList();
+      } catch (err) {
+        mostrarStatus(`Erro ao salvar: ${err.message}`, "err");
+      } finally {
+        saveBtn.disabled = false;
+      }
     });
 
     document.getElementById("clear-btn").addEventListener("click", limparFormulario);
@@ -154,8 +332,7 @@
     function limparFormulario() {
       form.reset();
       document.getElementById("edit-index").value = "-1";
-      document.getElementById("save-btn").textContent = "Adicionar memória";
-      geoStatus.textContent = 'Digite a cidade acima e clique em "Buscar coordenadas" para marcar no mapa automaticamente.';
+      saveBtn.textContent = "Salvar memória no GitHub";
     }
 
     function renderList() {
@@ -167,7 +344,7 @@
         div.innerHTML = `
           <div>
             <strong>${m.titulo}</strong>
-            <span>${m.ano} · ${m.lugar} · ${m.imagens.length} foto(s) ${m.coords ? "· No mapa" : ""}</span>
+            <span>${m.ano} · ${m.lugar} · ${(m.imagens || []).length} foto(s)</span>
           </div>
           <div style="display:flex; gap:0.4rem;">
             <button type="button" class="secondary small-btn" onclick="editar(${i})">Editar</button>
@@ -188,25 +365,23 @@
       document.getElementById("tags").value = (m.tags || []).join(", ");
       imagensField.value = (m.imagens || []).join("\n");
       document.getElementById("texto").value = m.texto;
-      document.getElementById("save-btn").textContent = "Salvar alterações";
+      saveBtn.textContent = "Atualizar memória no GitHub";
+      window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
-    window.remover = (i) => {
-      if (confirm("Remover esta memória?")) {
-        memorias.splice(i, 1);
+    window.remover = async (i) => {
+      const titulo = memorias[i].titulo;
+      if (!confirm(`Excluir "${titulo}" definitivamente?`)) return;
+      memorias.splice(i, 1);
+      try {
+        await salvarNoGitHub(`Remove memória: ${titulo}`);
         renderList();
+      } catch (err) {
+        mostrarStatus(`Erro ao excluir: ${err.message}`, "err");
       }
     };
 
-    document.getElementById("download-btn").addEventListener("click", () => {
-      const blob = new Blob([JSON.stringify(memorias, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "memorias.json";
-      a.click();
-      URL.revokeObjectURL(url);
-    });
+    if (token) tentarEntrar(token);
   </script>
 </body>
 </html>

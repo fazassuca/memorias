@@ -7,24 +7,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <!-- Leaflet (Mapa minimalista gratuito) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
-  <!-- Trava simples opcional -->
-  <div id="lock-screen" class="lock-screen hidden">
-    <div class="lock-box">
-      <p class="lock-label">Arquivo Privado</p>
-      <h1 class="lock-title">Digite a senha</h1>
-      <form id="lock-form">
-        <input type="password" id="lock-input" placeholder="••••••••" autocomplete="off" required />
-        <button type="submit">Entrar</button>
-      </form>
-      <p id="lock-error" class="lock-error"></p>
-    </div>
-  </div>
 
   <div id="app">
     <!-- Barra de Navegação Superior -->
@@ -35,6 +21,7 @@
         <button class="nav-btn" data-view="timeline">Galeria</button>
         <button class="nav-btn" data-view="map">Mapa</button>
         <button class="nav-btn" data-view="about">Sobre</button>
+        <button id="theme-toggle" class="nav-btn" aria-label="Alternar tema">Escuro</button>
       </div>
     </nav>
 

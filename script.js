@@ -1,6 +1,3 @@
-const USAR_SENHA = false;
-const SENHA_ACESSO = "minhasenha123";
-
 let memorias = [];
 let filaAleatoria = [];
 let memoriaAtualIndex = -1;
@@ -18,12 +15,6 @@ const views = {
 const navButtons = document.querySelectorAll("[data-view]");
 
 // Elementos do Leitor
-const elApp = document.getElementById("app");
-const elLockScreen = document.getElementById("lock-screen");
-const elLockForm = document.getElementById("lock-form");
-const elLockInput = document.getElementById("lock-input");
-const elLockError = document.getElementById("lock-error");
-
 const elImg = document.getElementById("slide-image");
 const elPrevSlide = document.getElementById("prev-slide");
 const elNextSlide = document.getElementById("next-slide");
@@ -44,28 +35,30 @@ const elFilterType = document.getElementById("filter-type");
 const elFilterHeading = document.getElementById("filter-heading");
 const elFilterResults = document.getElementById("filter-results");
 const elCloseDrawer = document.getElementById("close-drawer");
+const elThemeToggle = document.getElementById("theme-toggle");
 
-function iniciar() {
-  if (USAR_SENHA && sessionStorage.getItem("diario_auth") !== "ok") {
-    elLockScreen.classList.remove("hidden");
-    elApp.classList.add("hidden");
-    elLockForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      if (elLockInput.value === SENHA_ACESSO) {
-        sessionStorage.setItem("diario_auth", "ok");
-        elLockScreen.classList.add("hidden");
-        elApp.classList.remove("hidden");
-        carregarMemorias();
-      } else {
-        elLockError.textContent = "Senha incorreta.";
-        elLockInput.value = "";
-      }
-    });
-  } else {
-    carregarMemorias();
+// --- MODO CLARO / ESCURO ---
+function aplicarTema(tema) {
+  document.documentElement.setAttribute("data-theme", tema);
+  localStorage.setItem("diario_tema", tema);
+  if (elThemeToggle) {
+    elThemeToggle.textContent = tema === "dark" ? "Claro" : "Escuro";
   }
 }
 
+const temaSalvo =
+  localStorage.getItem("diario_tema") ||
+  (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+aplicarTema(temaSalvo);
+
+if (elThemeToggle) {
+  elThemeToggle.addEventListener("click", () => {
+    const atual = document.documentElement.getAttribute("data-theme");
+    aplicarTema(atual === "dark" ? "light" : "dark");
+  });
+}
+
+// --- CARREGAMENTO DOS DADOS ---
 async function carregarMemorias() {
   try {
     const res = await fetch("memorias.json");
@@ -76,17 +69,17 @@ async function carregarMemorias() {
     construirTimeline();
   } catch (err) {
     elTitle.textContent = "Erro ao carregar memorias.json";
-    elText.innerHTML = "<p>Abra este site usando o Live Server no VS Code.</p>";
+    elText.innerHTML = "<p>Verifique se o arquivo memorias.json está na mesma pasta do site.</p>";
   }
 }
 
-// Alternar entre páginas (Aleatório, Galeria, Mapa, Sobre)
+// --- NAVEGAÇÃO ENTRE PÁGINAS ---
 function mudarView(nomeView) {
   Object.entries(views).forEach(([chave, el]) => {
     el.classList.toggle("hidden", chave !== nomeView);
   });
 
-  document.querySelectorAll(".nav-btn").forEach((btn) => {
+  document.querySelectorAll(".nav-btn[data-view]").forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.view === nomeView);
   });
 
@@ -100,7 +93,7 @@ navButtons.forEach((btn) => {
   btn.addEventListener("click", () => mudarView(btn.dataset.view));
 });
 
-// --- MODO ALEATÓRIO ---
+// --- MODO ALEATÓRIO SEM REPETIÇÃO ---
 function gerarNovaFila() {
   filaAleatoria = memorias.map((_, i) => i);
   for (let i = filaAleatoria.length - 1; i > 0; i--) {
@@ -183,7 +176,6 @@ function atualizarSlideshow() {
 function construirTimeline() {
   elTimelineTrack.innerHTML = "";
 
-  // Agrupa por ano em ordem cronológica (mais antigo -> mais recente)
   const porAno = {};
   memorias.forEach((mem, idx) => {
     const ano = mem.ano;
@@ -225,27 +217,28 @@ function construirTimeline() {
   });
 }
 
-// Permite rolar a galeria horizontalmente usando o scroll vertical do mouse
-elTimelineTrack.addEventListener("wheel", (e) => {
-  if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-    e.preventDefault();
-    elTimelineTrack.scrollLeft += e.deltaY;
-  }
-}, { passive: false });
+elTimelineTrack.addEventListener(
+  "wheel",
+  (e) => {
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      e.preventDefault();
+      elTimelineTrack.scrollLeft += e.deltaY;
+    }
+  },
+  { passive: false }
+);
 
-// --- MAPA INTERATIVO ---
+// --- MAPA INTERATIVO (OpenStreetMap) ---
 function iniciarMapa() {
   if (mapaInstancia) return;
 
   mapaInstancia = L.map("map-container", { zoomControl: true }).setView([-14.235, -51.925], 3);
 
-  // Estilo minimalista claro (CartoDB Positron)
- L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "&copy; OpenStreetMap",
     maxZoom: 18
   }).addTo(mapaInstancia);
 
-  // Agrupa memórias por cidade que possuem coordenadas
   const cidades = {};
   memorias.forEach((mem) => {
     if (Array.isArray(mem.coords) && mem.coords.length === 2) {
@@ -321,11 +314,15 @@ function fecharFiltro() {
 
 function escapeHtml(str) {
   return str.replace(/[&<>"']/g, (m) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
   }[m]));
 }
 
-// Eventos
+// --- EVENTOS ---
 elNextRandom.addEventListener("click", proximaAleatoria);
 elYear.addEventListener("click", () => abrirFiltro("ano", memorias[memoriaAtualIndex].ano));
 elCity.addEventListener("click", () => abrirFiltro("lugar", memorias[memoriaAtualIndex].lugar));
@@ -354,4 +351,4 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowLeft" && memorias[memoriaAtualIndex]?.imagens.length > 1) elPrevSlide.click();
 });
 
-iniciar();
+carregarMemorias();
