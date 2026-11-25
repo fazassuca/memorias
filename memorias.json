@@ -1,0 +1,23 @@
+[
+  {
+    "titulo": "O primeiro apartamento",
+    "ano": 2019,
+    "lugar": "João Pessoa",
+    "tags": ["casa", "recomeços", "juventude"],
+    "imagens": [
+      "https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=1200",
+      "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=1200"
+    ],
+    "texto": "Na primeira semana não tínhamos mesa nem cortinas, apenas caixas empilhadas perto da janela e o barulho do vento entrando pela sala vazia.\n\nMesmo assim, fazer café no chão da cozinha parecia a maior conquista do mundo."
+  },
+  {
+    "titulo": "Tarde de chuva no centro",
+    "ano": 2022,
+    "lugar": "Lisboa",
+    "tags": ["viagem", "inverno"],
+    "imagens": [
+      "https://images.unsplash.com/photo-1513735492246-483525079686?w=1200"
+    ],
+    "texto": "Ficamos presos em um café pequeno esperando a tempestade passar. A cidade inteira parecia andar em câmera lenta atrás do vidro embaçado."
+  }
+]

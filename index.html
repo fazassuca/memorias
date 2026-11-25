@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arquivo Pessoal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Trava simples opcional (pode ser desativada no topo do script.js) -->
+  <div id="lock-screen" class="lock-screen hidden">
+    <div class="lock-box">
+      <p class="lock-label">Arquivo Privado</p>
+      <h1 class="lock-title">Digite a senha</h1>
+      <form id="lock-form">
+        <input type="password" id="lock-input" placeholder="••••••••" autocomplete="off" required />
+        <button type="submit">Entrar</button>
+      </form>
+      <p id="lock-error" class="lock-error"></p>
+    </div>
+  </div>
+
+  <!-- Layout principal em tela dividida -->
+  <main id="app" class="split-layout">
+    
+    <!-- Lado Esquerdo: Slideshow de Imagens -->
+    <section class="media-pane">
+      <div class="slideshow-container">
+        <img id="slide-image" src="" alt="Memória" />
+        
+        <button id="prev-slide" class="slide-nav prev" aria-label="Foto anterior">←</button>
+        <button id="next-slide" class="slide-nav next" aria-label="Próxima foto">→</button>
+        
+        <div class="slide-footer">
+          <span id="slide-counter">01 / 01</span>
+          <div id="slide-dots" class="slide-dots"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lado Direito: Conteúdo Editorial -->
+    <section class="content-pane">
+      <div class="content-inner">
+        <header class="meta-bar">
+          <button id="memory-year" class="meta-link" title="Filtrar por ano"></button>
+          <span class="meta-sep">/</span>
+          <button id="memory-city" class="meta-link" title="Filtrar por lugar"></button>
+        </header>
+
+        <h1 id="memory-title" class="memory-title"></h1>
+
+        <div id="memory-tags" class="tags-list"></div>
+
+        <article id="memory-text" class="memory-text"></article>
+      </div>
+
+      <footer class="bottom-nav">
+        <span id="cycle-counter" class="cycle-counter"></span>
+        <button id="next-random" class="btn-next">Próxima memória →</button>
+      </footer>
+    </section>
+  </main>
+
+  <!-- Painel lateral de resultados ao clicar em Tag, Ano ou Cidade -->
+  <div id="filter-overlay" class="filter-overlay hidden">
+    <aside class="filter-drawer">
+      <header class="drawer-header">
+        <div>
+          <span id="filter-type" class="drawer-label">Filtro</span>
+          <h2 id="filter-heading" class="drawer-title"></h2>
+        </div>
+        <button id="close-drawer" class="btn-close" aria-label="Fechar">✕</button>
+      </header>
+      <ul id="filter-results" class="filter-results"></ul>
+    </aside>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

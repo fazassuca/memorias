@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gerenciador do Diário</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Manrope', sans-serif; background: #FAF9F6; color: #1A1A1A; max-width: 960px; margin: 0 auto; padding: 3rem 1.5rem; }
+    h1 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 3rem; margin-bottom: 0.5rem; }
+    .subtitle { color: #6E6A63; margin-bottom: 2.5rem; font-size: 0.9rem; }
+    .grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 3rem; }
+    label { display: block; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: #6E6A63; margin: 1rem 0 0.35rem; }
+    input, textarea { width: 100%; padding: 0.75rem; border: 1px solid #E2DED5; background: #fff; font-family: inherit; font-size: 0.95rem; }
+    textarea { min-height: 150px; resize: vertical; line-height: 1.6; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; flex-wrap: wrap; }
+    button { padding: 0.75rem 1.25rem; border: 1px solid #1A1A1A; background: #1A1A1A; color: #FAF9F6; font-family: inherit; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.06em; cursor: pointer; }
+    button.secondary { background: transparent; color: #1A1A1A; }
+    .list-item { border-bottom: 1px solid #E2DED5; padding: 0.9rem 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+    .list-item strong { font-family: 'Instrument Serif', serif; font-size: 1.35rem; font-weight: 400; display: block; }
+    .list-item span { font-size: 0.78rem; color: #6E6A63; }
+    .small-btn { padding: 0.35rem 0.65rem; font-size: 0.72rem; }
+    .hint { font-size: 0.78rem; color: #6E6A63; margin-top: 0.35rem; }
+    @media (max-width: 780px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <h1>Gerenciador de Memórias</h1>
+  <p class="subtitle">Adicione ou edite suas histórias e clique em "Baixar memorias.json" para substituir o arquivo na pasta do projeto.</p>
+
+  <div class="grid">
+    <form id="editor-form">
+      <input type="hidden" id="edit-index" value="-1" />
+
+      <label>Título</label>
+      <input type="text" id="titulo" required placeholder="Ex: Verão na casa de praia" />
+
+      <div class="row">
+        <div>
+          <label>Ano</label>
+          <input type="number" id="ano" required placeholder="2024" />
+        </div>
+        <div>
+          <label>Lugar / Cidade</label>
+          <input type="text" id="lugar" required placeholder="João Pessoa" />
+        </div>
+      </div>
+
+      <label>Tags (separadas por vírgula)</label>
+      <input type="text" id="tags" placeholder="família, viagem, verão" />
+
+      <label>Selecionar fotos da pasta imagens/ (opcional)</label>
+      <input type="file" id="file-picker" multiple accept="image/*" />
+      <p class="hint">Ao escolher fotos do seu Mac, o nome delas será adicionado como <code>imagens/nome-da-foto.jpg</code> abaixo. Certifique-se de que esses arquivos estejam dentro da pasta <code>imagens/</code>.</p>
+
+      <label>Caminhos ou links das imagens (um por linha)</label>
+      <textarea id="imagens" style="min-height: 85px;" placeholder="imagens/foto-01.jpg&#10;https://..."></textarea>
+
+      <label>Texto da história</label>
+      <textarea id="texto" required placeholder="Escreva sua memória aqui... Use Enter para separar parágrafos."></textarea>
+
+      <div class="actions">
+        <button type="submit" id="save-btn">Adicionar memória</button>
+        <button type="button" class="secondary" id="clear-btn">Limpar</button>
+      </div>
+    </form>
+
+    <div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <strong id="count-label">0 memórias</strong>
+        <button type="button" id="download-btn">Baixar memorias.json</button>
+      </div>
+      <div id="memory-list"></div>
+    </div>
+  </div>
+
+  <script>
+    let memorias = [];
+    const form = document.getElementById("editor-form");
+    const listEl = document.getElementById("memory-list");
+    const countEl = document.getElementById("count-label");
+    const filePicker = document.getElementById("file-picker");
+    const imagensField = document.getElementById("imagens");
+
+    // Carrega o memorias.json atual automaticamente via Live Server
+    fetch("memorias.json")
+      .then((r) => r.json())
+      .then((data) => { memorias = data; renderList(); })
+      .catch(() => renderList());
+
+    filePicker.addEventListener("change", () => {
+      const nomes = Array.from(filePicker.files).map((f) => `imagens/${f.name}`);
+      const atual = imagensField.value.trim();
+      imagensField.value = atual ? atual + "\n" + nomes.join("\n") : nomes.join("\n");
+    });
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const item = {
+        titulo: document.getElementById("titulo").value.trim(),
+        ano: Number(document.getElementById("ano").value),
+        lugar: document.getElementById("lugar").value.trim(),
+        tags: document.getElementById("tags").value.split(",").map((t) => t.trim()).filter(Boolean),
+        imagens: imagensField.value.split("\n").map((l) => l.trim()).filter(Boolean),
+        texto: document.getElementById("texto").value.trim()
+      };
+
+      const idx = Number(document.getElementById("edit-index").value);
+      if (idx >= 0) {
+        memorias[idx] = item;
+      } else {
+        memorias.unshift(item);
+      }
+
+      limparFormulario();
+      renderList();
+    });
+
+    document.getElementById("clear-btn").addEventListener("click", limparFormulario);
+
+    function limparFormulario() {
+      form.reset();
+      document.getElementById("edit-index").value = "-1";
+      document.getElementById("save-btn").textContent = "Adicionar memória";
+    }
+
+    function renderList() {
+      countEl.textContent = `${memorias.length} memória(s)`;
+      listEl.innerHTML = "";
+      memorias.forEach((m, i) => {
+        const div = document.createElement("div");
+        div.className = "list-item";
+        div.innerHTML = `
+          <div>
+            <strong>${m.titulo}</strong>
+            <span>${m.ano} · ${m.lugar} · ${m.imagens.length} foto(s)</span>
+          </div>
+          <div style="display:flex; gap:0.4rem;">
+            <button type="button" class="secondary small-btn" onclick="editar(${i})">Editar</button>
+            <button type="button" class="secondary small-btn" onclick="remover(${i})">Excluir</button>
+          </div>
+        `;
+        listEl.appendChild(div);
+      });
+    }
+
+    window.editar = (i) => {
+      const m = memorias[i];
+      document.getElementById("edit-index").value = i;
+      document.getElementById("titulo").value = m.titulo;
+      document.getElementById("ano").value = m.ano;
+      document.getElementById("lugar").value = m.lugar;
+      document.getElementById("tags").value = (m.tags || []).join(", ");
+      imagensField.value = (m.imagens || []).join("\n");
+      document.getElementById("texto").value = m.texto;
+      document.getElementById("save-btn").textContent = "Salvar alterações";
+    };
+
+    window.remover = (i) => {
+      if (confirm("Remover esta memória?")) {
+        memorias.splice(i, 1);
+        renderList();
+      }
+    };
+
+    document.getElementById("download-btn").addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(memorias, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "memorias.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  </script>
+</body>
+</html>
