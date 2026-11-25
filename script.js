@@ -122,11 +122,7 @@ function renderizarMemoria(index) {
   elCity.textContent = mem.lugar;
   elTitle.textContent = mem.titulo;
 
-  elText.innerHTML = mem.texto
-    .split(/\n+/)
-    .filter((p) => p.trim() !== "")
-    .map((p) => `<p>${escapeHtml(p)}</p>`)
-    .join("");
+elText.innerHTML = formatarTexto(mem.texto);
 
   elTags.innerHTML = "";
   (mem.tags || []).forEach((tag) => {
@@ -320,6 +316,24 @@ function escapeHtml(str) {
     '"': "&quot;",
     "'": "&#39;"
   }[m]));
+}
+
+function formatarTexto(texto) {
+  return texto
+    .split(/\n+/)
+    .filter((p) => p.trim() !== "")
+    .map((linha) => {
+      const limpa = escapeHtml(linha.trim());
+      const formatada = limpa
+        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+        .replace(/\*(.+?)\*/g, "<em>$1</em>");
+
+      if (limpa.startsWith("&gt;")) {
+        return `<blockquote>${formatada.replace(/^&gt;\s*/, "")}</blockquote>`;
+      }
+      return `<p>${formatada}</p>`;
+    })
+    .join("");
 }
 
 // --- EVENTOS ---
