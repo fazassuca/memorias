@@ -7,11 +7,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <!-- Leaflet (Mapa minimalista gratuito) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- Trava simples opcional (pode ser desativada no topo do script.js) -->
+  <!-- Trava simples opcional -->
   <div id="lock-screen" class="lock-screen hidden">
     <div class="lock-box">
       <p class="lock-label">Arquivo Privado</p>
@@ -24,48 +26,77 @@
     </div>
   </div>
 
-  <!-- Layout principal em tela dividida -->
-  <main id="app" class="split-layout">
-    
-    <!-- Lado Esquerdo: Slideshow de Imagens -->
-    <section class="media-pane">
-      <div class="slideshow-container">
-        <img id="slide-image" src="" alt="Memória" />
-        
-        <button id="prev-slide" class="slide-nav prev" aria-label="Foto anterior">←</button>
-        <button id="next-slide" class="slide-nav next" aria-label="Próxima foto">→</button>
-        
-        <div class="slide-footer">
-          <span id="slide-counter">01 / 01</span>
-          <div id="slide-dots" class="slide-dots"></div>
+  <div id="app">
+    <!-- Barra de Navegação Superior -->
+    <nav class="top-nav">
+      <button class="brand" data-view="reader">Arquivo Pessoal</button>
+      <div class="nav-links">
+        <button class="nav-btn active" data-view="reader">Aleatório</button>
+        <button class="nav-btn" data-view="timeline">Galeria</button>
+        <button class="nav-btn" data-view="map">Mapa</button>
+        <button class="nav-btn" data-view="about">Sobre</button>
+      </div>
+    </nav>
+
+    <!-- VIEW 1: Leitor em Tela Dividida (Aleatório) -->
+    <main id="view-reader" class="split-layout">
+      <section class="media-pane">
+        <div class="slideshow-container">
+          <img id="slide-image" src="" alt="Memória" />
+          <button id="prev-slide" class="slide-nav prev" aria-label="Foto anterior">←</button>
+          <button id="next-slide" class="slide-nav next" aria-label="Próxima foto">→</button>
+          <div class="slide-footer">
+            <span id="slide-counter">01 / 01</span>
+            <div id="slide-dots" class="slide-dots"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-pane">
+        <div class="content-inner">
+          <header class="meta-bar">
+            <button id="memory-year" class="meta-link" title="Filtrar por ano"></button>
+            <span class="meta-sep">/</span>
+            <button id="memory-city" class="meta-link" title="Filtrar por lugar"></button>
+          </header>
+
+          <h1 id="memory-title" class="memory-title"></h1>
+          <div id="memory-tags" class="tags-list"></div>
+          <article id="memory-text" class="memory-text"></article>
+        </div>
+
+        <footer class="bottom-nav">
+          <span id="cycle-counter" class="cycle-counter"></span>
+          <button id="next-random" class="btn-next">Próxima memória →</button>
+        </footer>
+      </section>
+    </main>
+
+    <!-- VIEW 2: Galeria / Timeline Horizontal -->
+    <section id="view-timeline" class="timeline-view hidden">
+      <div class="timeline-hint">Role para o lado para percorrer a exposição →</div>
+      <div id="timeline-track" class="timeline-track"></div>
+    </section>
+
+    <!-- VIEW 3: Mapa das Cidades -->
+    <section id="view-map" class="map-view hidden">
+      <div id="map-container"></div>
+    </section>
+
+    <!-- VIEW 4: Sobre o Projeto -->
+    <section id="view-about" class="about-view hidden">
+      <div class="about-inner">
+        <p class="about-label">Sobre o Arquivo</p>
+        <h1 class="about-title">Um diário visual feito para não deixar o tempo apagar os detalhes.</h1>
+        <div class="about-text">
+          <p>Este espaço é um arquivo pessoal de memórias, fotografias e histórias acumuladas ao longo dos anos. Ele foi pensado para ser lido sem pressa — ora de forma aleatória, como quem abre uma caixa de fotos antigas, ora percorrendo a linha do tempo ou revisitando cidades no mapa.</p>
+          <p>Você pode editar este texto diretamente no arquivo <code>index.html</code>, dentro da seção <code>view-about</code>, contando a origem do projeto, o que ele representa para você e como pretende alimentá-lo no futuro.</p>
         </div>
       </div>
     </section>
+  </div>
 
-    <!-- Lado Direito: Conteúdo Editorial -->
-    <section class="content-pane">
-      <div class="content-inner">
-        <header class="meta-bar">
-          <button id="memory-year" class="meta-link" title="Filtrar por ano"></button>
-          <span class="meta-sep">/</span>
-          <button id="memory-city" class="meta-link" title="Filtrar por lugar"></button>
-        </header>
-
-        <h1 id="memory-title" class="memory-title"></h1>
-
-        <div id="memory-tags" class="tags-list"></div>
-
-        <article id="memory-text" class="memory-text"></article>
-      </div>
-
-      <footer class="bottom-nav">
-        <span id="cycle-counter" class="cycle-counter"></span>
-        <button id="next-random" class="btn-next">Próxima memória →</button>
-      </footer>
-    </section>
-  </main>
-
-  <!-- Painel lateral de resultados ao clicar em Tag, Ano ou Cidade -->
+  <!-- Painel lateral de resultados (Tags, Ano, Cidade e Mapa) -->
   <div id="filter-overlay" class="filter-overlay hidden">
     <aside class="filter-drawer">
       <header class="drawer-header">
@@ -79,6 +110,7 @@
     </aside>
   </div>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

@@ -47,12 +47,22 @@
         </div>
       </div>
 
+      <div class="row" style="align-items: end;">
+        <div>
+          <label>Latitude / Longitude (Mapa)</label>
+          <input type="text" id="coords" placeholder="-7.1195, -34.8450" />
+        </div>
+        <div>
+          <button type="button" class="secondary" id="geo-btn" style="width:100%;">Buscar coordenadas</button>
+        </div>
+      </div>
+      <p id="geo-status" class="hint">Digite a cidade acima e clique em "Buscar coordenadas" para marcar no mapa automaticamente.</p>
+
       <label>Tags (separadas por vírgula)</label>
       <input type="text" id="tags" placeholder="família, viagem, verão" />
 
       <label>Selecionar fotos da pasta imagens/ (opcional)</label>
       <input type="file" id="file-picker" multiple accept="image/*" />
-      <p class="hint">Ao escolher fotos do seu Mac, o nome delas será adicionado como <code>imagens/nome-da-foto.jpg</code> abaixo. Certifique-se de que esses arquivos estejam dentro da pasta <code>imagens/</code>.</p>
 
       <label>Caminhos ou links das imagens (um por linha)</label>
       <textarea id="imagens" style="min-height: 85px;" placeholder="imagens/foto-01.jpg&#10;https://..."></textarea>
@@ -82,12 +92,35 @@
     const countEl = document.getElementById("count-label");
     const filePicker = document.getElementById("file-picker");
     const imagensField = document.getElementById("imagens");
+    const coordsField = document.getElementById("coords");
+    const geoStatus = document.getElementById("geo-status");
 
-    // Carrega o memorias.json atual automaticamente via Live Server
     fetch("memorias.json")
       .then((r) => r.json())
       .then((data) => { memorias = data; renderList(); })
       .catch(() => renderList());
+
+    // Busca automática de coordenadas via OpenStreetMap
+    document.getElementById("geo-btn").addEventListener("click", async () => {
+      const cidade = document.getElementById("lugar").value.trim();
+      if (!cidade) {
+        geoStatus.textContent = "Digite o nome do lugar/cidade primeiro.";
+        return;
+      }
+      geoStatus.textContent = "Buscando...";
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(cidade)}`);
+        const data = await res.json();
+        if (data.length > 0) {
+          coordsField.value = `${Number(data[0].lat).toFixed(4)}, ${Number(data[0].lon).toFixed(4)}`;
+          geoStatus.textContent = `Encontrado: ${data[0].display_name}`;
+        } else {
+          geoStatus.textContent = "Cidade não encontrada. Tente adicionar o estado ou país (ex: João Pessoa, Brasil).";
+        }
+      } catch {
+        geoStatus.textContent = "Erro ao buscar coordenadas. Verifique sua conexão.";
+      }
+    });
 
     filePicker.addEventListener("change", () => {
       const nomes = Array.from(filePicker.files).map((f) => `imagens/${f.name}`);
@@ -97,21 +130,20 @@
 
     form.addEventListener("submit", (e) => {
       e.preventDefault();
+      const coordsRaw = coordsField.value.split(",").map((n) => parseFloat(n.trim())).filter((n) => !isNaN(n));
       const item = {
         titulo: document.getElementById("titulo").value.trim(),
         ano: Number(document.getElementById("ano").value),
         lugar: document.getElementById("lugar").value.trim(),
+        coords: coordsRaw.length === 2 ? coordsRaw : undefined,
         tags: document.getElementById("tags").value.split(",").map((t) => t.trim()).filter(Boolean),
         imagens: imagensField.value.split("\n").map((l) => l.trim()).filter(Boolean),
         texto: document.getElementById("texto").value.trim()
       };
 
       const idx = Number(document.getElementById("edit-index").value);
-      if (idx >= 0) {
-        memorias[idx] = item;
-      } else {
-        memorias.unshift(item);
-      }
+      if (idx >= 0) memorias[idx] = item;
+      else memorias.unshift(item);
 
       limparFormulario();
       renderList();
@@ -123,6 +155,7 @@
       form.reset();
       document.getElementById("edit-index").value = "-1";
       document.getElementById("save-btn").textContent = "Adicionar memória";
+      geoStatus.textContent = 'Digite a cidade acima e clique em "Buscar coordenadas" para marcar no mapa automaticamente.';
     }
 
     function renderList() {
@@ -134,7 +167,7 @@
         div.innerHTML = `
           <div>
             <strong>${m.titulo}</strong>
-            <span>${m.ano} · ${m.lugar} · ${m.imagens.length} foto(s)</span>
+            <span>${m.ano} · ${m.lugar} · ${m.imagens.length} foto(s) ${m.coords ? "· No mapa" : ""}</span>
           </div>
           <div style="display:flex; gap:0.4rem;">
             <button type="button" class="secondary small-btn" onclick="editar(${i})">Editar</button>
@@ -151,6 +184,7 @@
       document.getElementById("titulo").value = m.titulo;
       document.getElementById("ano").value = m.ano;
       document.getElementById("lugar").value = m.lugar;
+      coordsField.value = m.coords ? m.coords.join(", ") : "";
       document.getElementById("tags").value = (m.tags || []).join(", ");
       imagensField.value = (m.imagens || []).join("\n");
       document.getElementById("texto").value = m.texto;

@@ -3,6 +3,7 @@
     "titulo": "O primeiro apartamento",
     "ano": 2019,
     "lugar": "João Pessoa",
+    "coords": [-7.1195, -34.845],
     "tags": ["casa", "recomeços", "juventude"],
     "imagens": [
       "https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=1200",
@@ -14,6 +15,7 @@
     "titulo": "Tarde de chuva no centro",
     "ano": 2022,
     "lugar": "Lisboa",
+    "coords": [38.7223, -9.1393],
     "tags": ["viagem", "inverno"],
     "imagens": [
       "https://images.unsplash.com/photo-1513735492246-483525079686?w=1200"
