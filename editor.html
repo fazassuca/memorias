@@ -499,6 +499,26 @@
       }
     };
 
+    // --- BARRA DE FORMATAÇÃO DO TEXTO ---
+    const textoField = document.getElementById("texto");
+
+    document.querySelectorAll(".tool-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const inicio = textoField.selectionStart;
+        const fim = textoField.selectionEnd;
+        const selecionado = textoField.value.substring(inicio, fim) || "texto aqui";
+        const tipo = btn.dataset.format;
+
+        let resultado = selecionado;
+        if (tipo === "bold") resultado = `**${selecionado}**`;
+        if (tipo === "italic") resultado = `*${selecionado}*`;
+        if (tipo === "quote") resultado = `\n> ${selecionado}\n`;
+
+        textoField.setRangeText(resultado, inicio, fim, "select");
+        textoField.focus();
+      });
+    });
+    
     if (token) tentarEntrar(token);
   </script>
 </body>
