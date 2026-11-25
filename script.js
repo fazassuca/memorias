@@ -61,7 +61,7 @@ if (elThemeToggle) {
 // --- CARREGAMENTO DOS DADOS ---
 async function carregarMemorias() {
   try {
-    const res = await fetch("memorias.json");
+const res = await fetch(`memorias.json?t=${Date.now()}`, { cache: "no-store" });
     memorias = await res.json();
     if (!memorias.length) return;
     gerarNovaFila();
