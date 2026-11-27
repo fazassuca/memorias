@@ -1,5 +1,25 @@
 [
   {
+    "titulo": "Taxi",
+    "ano": 2005,
+    "lugar": "João Pessoa",
+    "coords": [
+      -7.1216,
+      -34.882
+    ],
+    "tags": [
+      "20 e pouco",
+      "jampa"
+    ],
+    "imagens": [
+      "imagens/1795747194644-0-297264676_30fa603bba.jpg",
+      "imagens/1795747196431-1-297264683_cbe7148e3b.jpg",
+      "imagens/1795747198226-2-297264697_303aa9c0e7.jpg",
+      "imagens/1795747200226-3-297264714_51e04f7698.jpg"
+    ],
+    "texto": "Durante um bom tempo eu me envolvi com o cinema. Seja fazendo filmes, como o curta de 1 minuto \"As Galinhas\", seja como ator, still ou ajudando na produção de outros tantos filmes. \n\nEm 2005 fui chamado pra atuar como taxista no curta \"Táxi\" de Lorena Travassos. Era um curta divertido, nem lembro bem o enredo. Lembro que gravamos boa parte das cenas no centro histórico, com uma gravação clássica no cabaré da Rua da Areia. Atuava também no filme a Ivna Alba."
+  },
+  {
     "titulo": "Surf Trips: Barra de Santo Antônio",
     "ano": 2005,
     "lugar": "Barra de Santo Antônio",
