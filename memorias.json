@@ -1,5 +1,31 @@
 [
   {
+    "titulo": "Festa da Lavadeira",
+    "ano": 2006,
+    "lugar": "Praia do Paiva",
+    "coords": [
+      -8.2395,
+      -34.9384
+    ],
+    "tags": [
+      "20 e pouco",
+      "projeto pessoal",
+      "lomo"
+    ],
+    "imagens": [
+      "imagens/1795744574219-0-9c7274f8-3aad-46ba-886b-dcae79983428.jpg",
+      "imagens/1795744576183-1-9ec62f80-f8d8-4ac0-aab3-494c625b3764.jpg",
+      "imagens/1795744577770-2-053f5b75-283a-4bb7-b74e-e5561e253160.jpg",
+      "imagens/1795744579611-3-544766c5-a5f3-4067-80f9-9bb975769159.jpg",
+      "imagens/1795744581478-4-295868603_b91f805624_c.jpg",
+      "imagens/1795744583451-5-a98bead0-9665-4665-b2b2-d64a46eaac9a.jpg",
+      "imagens/1795744585455-6-b81bb5c3-f10c-4e6c-b1af-7c5c354818b0.jpg",
+      "imagens/1795744587925-7-b4855293-d17f-4338-8bf9-ae5534b2d92f.jpg",
+      "imagens/1795744589736-8-ef0536cf-f6da-42bb-8cd9-354757ff75c1.jpg"
+    ],
+    "texto": "A Festa da Lavadeira era um evento que acontecia no dia 1 de maio na Praia do Paiva, em Jaboatão dos Guararapes, antes dessa praia ser privatizada e virar um grande conglomerado de empreendimentos privados. Lembro que o Nazareno Andrade, vulgo Naza, me chamou pra ir com ele na festa. Na época, a gente vinha participando de algumas aventuras fotográficas e eu achava incrível essas dinâmicas de viajar e tirar fotos. Eu usava uma Canon semi-profissional que tinha ganhado da minha mãe com 15 anos e levava sempre minha LCA, ou seja, era tudo com negativo. \n\nLembro da gente descendo uma ladeira e quase atolando o carro e chegando nessa grande festa, entre coqueirais e lamaçais, palcos, artistas, loucos e toda sorte de gente. \n> A festa era intensa, as pessoas se melavam de lama, dançavam e bebiam, e um mar gigante lavava e abençoava todo mundo.\n As fotos em preto e branco trouxeram ainda mais intensidade para a festividade."
+  },
+  {
     "titulo": "Deus é um designer",
     "ano": 2008,
     "lugar": "João Pessoa",
