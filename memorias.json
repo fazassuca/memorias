@@ -1,5 +1,32 @@
 [
   {
+    "titulo": "Surf Trips: Barra de Santo Antônio",
+    "ano": 2005,
+    "lugar": "Barra de Santo Antônio",
+    "coords": [
+      -9.4038,
+      -35.5118
+    ],
+    "tags": [
+      "20 e pouco",
+      "lomo",
+      "aventura"
+    ],
+    "imagens": [
+      "imagens/1795745730655-0-canavial_dirigindo_106901335_c.jpg",
+      "imagens/1795745733290-1-captain_nikolas_bicicletas_menor_106901849_m.jpg",
+      "imagens/1795745735128-2-captain_nikolas_fogueira2_106901998_c.jpg",
+      "imagens/1795745736824-3-captain_nikolas_noite_106902255_c.jpg",
+      "imagens/1795745738671-4-carro_quebrado_nomar2_106902851_c.jpg",
+      "imagens/1795745740548-5-carro_quebrado_surfando_106903268_c.jpg",
+      "imagens/1795745742320-6-gale_joao2_106903618_c.jpg",
+      "imagens/1795745744463-7-gale_todo-mundo_106904088_c.jpg",
+      "imagens/1795745746463-8-japaratinga_balsa_106904465_c.jpg",
+      "imagens/1795745748277-9-japaratinga_todomundo_106904570_c.jpg"
+    ],
+    "texto": "Essa foi uma das viagens mais libertadoras. Eu tinha 21 anos, tava com meu irmão Pedro, a namorada dele na época Luciana, Carol Lubambo e Tiago Pacheco, e Felipe Nicolau, com a namorada dele na época Bia. A gente partiu em dois carros de João Pessoa para Barra de Santo Antônio em Alagoas, depois de Japaratinga. \n\nFoi uma viagem incrível. Lembro que atolamos o carro na passagem de carro pelo rio em Japaratinga, o que atrasou nossa chegada e acabamos acampando no escuro na primeira noite. Depois fomos para outro pico onde a gente se instalou na frente de um hotel fechado na baixa temporada. Lá tinha um vigia que deixou a gente usar o banheiro. No segundo dia, talvez pelo nervosismo da viagem, eu adoeci. \n> A foto em que estou na fogueira, tava queimando de febre.\n Mas logo depois melhorei e a gente curtiu muito o isolamento e as praias da região. Fizemos um passeio de barco pelas Galés, onde a gente viu os peixinhos.\n\nEssa trip foi uma das primeiras viagens onde acampei selvagem junto com os amigos. Acho que antes dela, tinha apenas ido em uma viagem de surf com meu irmão pra Baía da Traição, onde a gente acampou nas terras indígenas."
+  },
+  {
     "titulo": "Festa da Lavadeira",
     "ano": 2006,
     "lugar": "Praia do Paiva",
